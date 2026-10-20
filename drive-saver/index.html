@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drive Saver — BotVerse</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1d1d1b; --muted:#5f5f5a; --line:#e3e3dc; --accent:#1a6b4a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151514; --fg:#ececE6; --muted:#a3a39c; --line:#2c2c29; --accent:#5ec49a; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:48px 16px 64px; }
+  h1 { font-size:2rem; margin:0 0 4px; } h2 { font-size:1.15rem; margin:32px 0 8px; }
+  .sub { color:var(--muted); margin:0 0 24px; } a { color:var(--accent); }
+  ol, ul { padding-left:22px; } li { margin:6px 0; }
+  footer { margin-top:48px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Drive Saver</h1>
+  <p class="sub">A Telegram bot by BotVerse that saves files you send it into your own Google Drive.</p>
+
+  <h2>How it works</h2>
+  <ol>
+    <li>Open Drive Saver in Telegram and tap <b>Connect Google Drive</b>.</li>
+    <li>Sign in with Google and allow access. Drive Saver asks only for the <b>drive.file</b> permission: it can see and change only the files it creates for you, and nothing else in your Drive.</li>
+    <li>Send or forward a file to the bot. It is uploaded into a "Telegram Saver" folder in your Drive and you get a link to it.</li>
+  </ol>
+
+  <h2>Your control</h2>
+  <ul>
+    <li><b>/disconnect</b> removes the bot's access to your Google account.</li>
+    <li><b>/deletemydata</b> removes access and deletes everything the bot keeps about you.</li>
+    <li>You can also remove access any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  </ul>
+
+  <p><a href="privacy">Privacy policy</a></p>
+
+  <footer>BotVerse · contact: <a href="mailto:thebotverse01@gmail.com">thebotverse01@gmail.com</a></footer>
+</main>
+</body>
+</html>

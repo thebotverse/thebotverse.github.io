@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drive Saver Privacy</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1d1d1b; --muted:#5f5f5a; --line:#e3e3dc; --accent:#1a6b4a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151514; --fg:#ececE6; --muted:#a3a39c; --line:#2c2c29; --accent:#5ec49a; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:48px 16px 64px; }
+  h1 { font-size:2rem; margin:0 0 4px; } h2 { font-size:1.15rem; margin:32px 0 8px; }
+  .sub { color:var(--muted); margin:0 0 24px; } a { color:var(--accent); }
+  ul { padding-left:22px; } li { margin:6px 0; }
+  footer { margin-top:48px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Drive Saver Privacy Policy</h1>
+  <p class="sub">Last updated: 21 October 2026</p>
+
+  <p>Drive Saver is a Telegram bot run by BotVerse. It saves files you send it into your own Google Drive. This page explains what it collects and what it does with it.</p>
+
+  <h2>Google permission we ask for</h2>
+  <p>Only <b>https://www.googleapis.com/auth/drive.file</b>. With it, Drive Saver can create files in your Drive and see or change only the files it created. It cannot see, read or delete anything else in your Drive.</p>
+
+  <h2>What we keep</h2>
+  <ul>
+    <li>Your Telegram user ID and language.</li>
+    <li>The email address of the Google account you connected, so the bot can tell you which Drive it saves to.</li>
+    <li>A Google access key (refresh token), stored encrypted on our server.</li>
+    <li>The ID of the "Telegram Saver" folder it created in your Drive.</li>
+    <li>A list of saved file names, sizes and results, deleted after 30 days.</li>
+    <li>Simple usage events (for example "connected"), used only to count how many people use the bot.</li>
+  </ul>
+
+  <h2>Your files</h2>
+  <p>A file you send passes through our server only while it is uploaded to your Drive, and is deleted from the server straight after. We do not keep copies, we do not look at file contents, and we do not create public or shared links.</p>
+
+  <h2>How Google user data is used</h2>
+  <p>Google user data is used only to upload the files you send to your own Drive and to show you where they were saved. It is not sold, not shared with anyone, not used for ads, and not used to train AI models. Drive Saver's use and transfer of information received from Google APIs follows the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+  <h2>Deleting your data</h2>
+  <ul>
+    <li><b>/disconnect</b> in the bot removes its access to your Google account.</li>
+    <li><b>/deletemydata</b> removes access and deletes everything listed above.</li>
+    <li>You can also remove access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+    <li>Files already saved stay in your Drive: they are yours, and you can delete them yourself.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p><a href="mailto:thebotverse01@gmail.com">thebotverse01@gmail.com</a></p>
+
+  <footer><a href="./">Drive Saver home</a> · BotVerse</footer>
+</main>
+</body>
+</html>
