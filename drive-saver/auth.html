@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Drive Saver · connecting</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; padding: 56px 16px;
+         background: #fff; color: #1f2328; }
+  @media (prefers-color-scheme: dark) { body { background: #0f1115; color: #e6e6e6; } }
+  h1 { font-size: 26px; margin: 0 0 12px; }
+  p { font-size: 17px; line-height: 1.5; }
+  .spin { width: 42px; height: 42px; border: 4px solid #2AABEE33; border-top-color: #2AABEE; border-radius: 50%;
+          margin: 24px auto; animation: r 0.9s linear infinite; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  a.btn { display: inline-block; background: #2AABEE; color: #fff; padding: 14px 26px; border-radius: 12px;
+          text-decoration: none; font-size: 18px; }
+</style>
+</head>
+<body>
+<!-- Drive Saver one-tap sign-in (bot v1.17.0). Google sends the person here with ?code&state (or ?error); this page hands
+     them to the bot's server in a POST (not in a URL, so the code never lands in a log) and the bot finishes the
+     connection and says "Connected" in Telegram. Nothing is stored here. -->
+<h1 id="h">Connecting your Google Drive…</h1>
+<div class="spin" id="s"></div>
+<p id="p">One moment.</p>
+<form id="f" method="post" action="https://167.99.68.70:8444/ds/cb">
+  <input type="hidden" name="code" id="code">
+  <input type="hidden" name="state" id="state">
+  <input type="hidden" name="error" id="error">
+</form>
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var state = q.get("state") || "";
+    if (!state) {
+      document.getElementById("h").textContent = "Drive Saver";
+      document.getElementById("s").style.display = "none";
+      document.getElementById("p").innerHTML = 'Open the bot in Telegram and tap Connect.<br><br>' +
+        '<a class="btn" href="https://t.me/CloudXpertbot">Open Telegram</a>';
+      return;
+    }
+    document.getElementById("code").value = q.get("code") || "";
+    document.getElementById("state").value = state;
+    document.getElementById("error").value = q.get("error") || "";
+    history.replaceState(null, "", location.pathname);          // the code leaves the address bar at once
+    document.getElementById("f").submit();
+  })();
+</script>
+</body>
+</html>
