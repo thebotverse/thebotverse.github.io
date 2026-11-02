@@ -20,9 +20,9 @@
 </style>
 </head>
 <body>
-<!-- Drive Saver one-tap sign-in (bot v1.17.0). Google sends the person here with ?code&state (or ?error); this page hands
-     them to the bot's server in a POST (not in a URL, so the code never lands in a log) and the bot finishes the
-     connection and says "Connected" in Telegram. Nothing is stored here. -->
+<!-- Drive Saver one-tap sign-in (bot v1.17.1). Google sends the person here with ?code&state (or ?error). The page posts
+     them to the bot's server IN THE BACKGROUND and shows the answer itself, so the address bar stays on this site; if
+     that cannot be done (old browser, network), it falls back to a normal form post. The code is never put in a URL. -->
 <h1 id="h">Connecting your Google Drive…</h1>
 <div class="spin" id="s"></div>
 <p id="p">One moment.</p>
@@ -33,20 +33,42 @@
 </form>
 <script>
   (function () {
+    var TG = "tg://resolve?domain=CloudXpertbot", WEB = "https://t.me/CloudXpertbot";
     var q = new URLSearchParams(location.search);
-    var state = q.get("state") || "";
+    var state = q.get("state") || "", code = q.get("code") || "", error = q.get("error") || "";
+    function show(ok) {
+      document.getElementById("s").style.display = "none";
+      document.getElementById("h").textContent = ok ? "✅ Connected!" : "⚠️ That link did not work";
+      document.getElementById("p").innerHTML = (ok
+        ? "Your Google Drive is connected. Go back to Telegram and send a file."
+        : "It was already used or is too old. Go back to Telegram and tap Connect again.") +
+        '<br><br><a class="btn" href="' + TG + '">Open Telegram</a>' +
+        '<br><br><a href="' + WEB + '" style="color:#2AABEE">Telegram not opening? Tap here</a>';
+      setTimeout(function () { location.href = TG; }, ok ? 900 : 4000);
+    }
     if (!state) {
       document.getElementById("h").textContent = "Drive Saver";
       document.getElementById("s").style.display = "none";
       document.getElementById("p").innerHTML = 'Open the bot in Telegram and tap Connect.<br><br>' +
-        '<a class="btn" href="https://t.me/CloudXpertbot">Open Telegram</a>';
+        '<a class="btn" href="' + WEB + '">Open Telegram</a>';
       return;
     }
-    document.getElementById("code").value = q.get("code") || "";
-    document.getElementById("state").value = state;
-    document.getElementById("error").value = q.get("error") || "";
     history.replaceState(null, "", location.pathname);          // the code leaves the address bar at once
-    document.getElementById("f").submit();
+    function fallback() {
+      document.getElementById("code").value = code;
+      document.getElementById("state").value = state;
+      document.getElementById("error").value = error;
+      document.getElementById("f").submit();
+    }
+    if (!window.fetch || !window.URLSearchParams) { fallback(); return; }
+    var body = new URLSearchParams({code: code, state: state, error: error});
+    var done = false;
+    var timer = setTimeout(function () { if (!done) { done = true; fallback(); } }, 45000);
+    fetch("https://167.99.68.70:8444/ds/cbj", {method: "POST", body: body, mode: "cors", credentials: "omit",
+                                               referrerPolicy: "no-referrer"})
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (done) return; done = true; clearTimeout(timer); show(!!d.ok); })
+      .catch(function () { if (done) return; done = true; clearTimeout(timer); fallback(); });
   })();
 </script>
 </body>
