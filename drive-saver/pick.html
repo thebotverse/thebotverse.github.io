@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Drive Saver · pick a folder</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; padding: 56px 16px;
+         background: #fff; color: #1f2328; }
+  @media (prefers-color-scheme: dark) { body { background: #0f1115; color: #e6e6e6; } }
+  h1 { font-size: 26px; margin: 0 0 12px; }
+  p { font-size: 17px; line-height: 1.5; max-width: 520px; margin: 0 auto 12px; }
+  .spin { width: 42px; height: 42px; border: 4px solid #2AABEE33; border-top-color: #2AABEE; border-radius: 50%;
+          margin: 24px auto; animation: r 0.9s linear infinite; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  a.btn, button.btn { display: inline-block; background: #2AABEE; color: #fff; padding: 14px 26px; border-radius: 12px;
+          text-decoration: none; font-size: 18px; border: 0; cursor: pointer; margin: 6px; }
+</style>
+</head>
+<body>
+<!-- Drive Saver folder picker (bot v1.19.0). The bot's link carries a one-time code in the #fragment (never sent to any
+     server). The page asks the bot's server for what Google's picker needs (the person's OWN short-lived Drive token,
+     drive.file only), opens Google's picker for FOLDERS (My Drive, shared with me, shared drives), and sends only the
+     picked folder's id back. The bot then reads the folder's name and edit right from Google itself. -->
+<h1 id="h">Opening your Google Drive…</h1>
+<div class="spin" id="s"></div>
+<p id="p">One moment.</p>
+<p id="b"></p>
+<script>
+  (function () {
+    var API = "https://167.99.68.70:8444/ds/";
+    var BOT = "CloudXpertbot", TG = "tg://resolve?domain=" + BOT, WEB = "https://t.me/" + BOT;
+    var FOLDER = "application/vnd.google-apps.folder";
+    var state = (new URLSearchParams(location.hash.slice(1))).get("s") || "";
+    history.replaceState(null, "", location.pathname);             // the code leaves the address bar at once
+    var el = function (id) { return document.getElementById(id); };
+    function show(head, text, again) {
+      el("s").style.display = "none";
+      el("h").textContent = head;
+      el("p").textContent = text;
+      el("b").innerHTML = (again ? '<button class="btn" id="again">Pick a folder</button><br>' : "") +
+        '<a class="btn" href="' + TG + '">Open Telegram</a><br><br>' +
+        '<a href="' + WEB + '" style="color:#2AABEE">Telegram not opening? Tap here</a>';
+      if (again) el("again").onclick = openPicker;
+    }
+    function post(path, data) {
+      return fetch(API + path, {method: "POST", body: new URLSearchParams(data), mode: "cors", credentials: "omit",
+                                referrerPolicy: "no-referrer"}).then(function (r) { return r.json(); });
+    }
+    if (!state || !window.fetch || !window.URLSearchParams) {
+      show("Drive Saver", "Open the bot in Telegram, tap 📁 Save to, then 🔍 Pick from my Drive.", false);
+      return;
+    }
+    var cfg = null;
+    function openPicker() {
+      el("s").style.display = "block"; el("b").innerHTML = "";
+      var mine = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+        .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setOwnedByMe(true);
+      var shared = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+        .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setOwnedByMe(false);
+      var drives = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+        .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setEnableDrives(true);
+      new google.picker.PickerBuilder()
+        .addView(mine).addView(shared).addView(drives)
+        .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+        .setOAuthToken(cfg.token).setDeveloperKey(cfg.key).setAppId(cfg.app)
+        .setTitle("Pick the folder for Drive Saver")
+        .setCallback(picked).build().setVisible(true);
+    }
+    function picked(d) {
+      if (d.action === google.picker.Action.CANCEL) {
+        show("No folder picked", "Nothing changed. You can pick again, or go back to Telegram.", true);
+        return;
+      }
+      if (d.action !== google.picker.Action.PICKED || !d.docs || !d.docs.length) return;
+      el("h").textContent = "Saving your choice…";
+      post("pkd", {s: state, id: d.docs[0].id}).then(function (r) {
+        if (r.ok) show("✅ Done!", "New files now go to " + (r.name || "that folder") + ". Go back to Telegram.", false);
+        else if (r.why === "readonly") show("⚠️ View only", "You can't add files to that folder. Go back to Telegram to pick another one.", false);
+        else show("⚠️ That did not work", "The link was already used or is too old. Go back to Telegram and tap Pick from my Drive again.", false);
+        if (r.ok) setTimeout(function () { location.href = TG; }, 1500);
+      }).catch(function () { show("⚠️ No connection", "Please check your internet and try again from Telegram.", false); });
+    }
+    post("pkt", {s: state}).then(function (r) {
+      if (!r.ok) {
+        show("⚠️ That link did not work", r.why === "login"
+          ? "Your Drive connection needs renewing. Go back to Telegram and tap Connect."
+          : "It was already used or is too old. Go back to Telegram and tap Pick from my Drive again.", false);
+        return;
+      }
+      cfg = r;
+      var sc = document.createElement("script");
+      sc.src = "https://apis.google.com/js/api.js";
+      sc.onload = function () { gapi.load("picker", { callback: openPicker }); };
+      sc.onerror = function () { show("⚠️ Google did not load", "Please try again in a minute.", false); };
+      document.head.appendChild(sc);
+    }).catch(function () { show("⚠️ No connection", "Please check your internet and try again from Telegram.", false); });
+  })();
+</script>
+</body>
+</html>
