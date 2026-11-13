@@ -40,7 +40,7 @@
       el("s").style.display = "none";
       el("h").textContent = head;
       el("p").textContent = text;
-      el("b").innerHTML = (again ? '<button class="btn" id="again">Pick a folder</button><br>' : "") +
+      el("b").innerHTML = (again ? '<button class="btn" id="again">Pick folders</button><br>' : "") +
         '<a class="btn" href="' + TG + '">Open Telegram</a><br><br>' +
         '<a href="' + WEB + '" style="color:#2AABEE">Telegram not opening? Tap here</a>';
       if (again) el("again").onclick = openPicker;
@@ -56,6 +56,10 @@
     var cfg = null;
     function openPicker() {
       el("s").style.display = "block"; el("b").innerHTML = "";
+      // v1.32.0: My Drive as a TREE first (open a folder, go as deep as you like), then the flat lists as before
+      var tree = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+        .setParent("root").setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER);
+      if (tree.setLabel) tree.setLabel("My Drive");
       var mine = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
         .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setOwnedByMe(true);
       var shared = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
@@ -63,10 +67,11 @@
       var drives = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
         .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setEnableDrives(true);
       new google.picker.PickerBuilder()
-        .addView(mine).addView(shared).addView(drives)
+        .addView(tree).addView(mine).addView(shared).addView(drives)
         .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+        .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)      // tick every folder you use, in one visit
         .setOAuthToken(cfg.token).setDeveloperKey(cfg.key).setAppId(cfg.app)
-        .setTitle("Pick the folder for Drive Saver")
+        .setTitle("Tick the folders for Drive Saver")
         .setCallback(picked).build().setVisible(true);
     }
     function picked(d) {
@@ -76,9 +81,11 @@
       }
       if (d.action !== google.picker.Action.PICKED || !d.docs || !d.docs.length) return;
       el("h").textContent = "Saving your choice…";
-      post("pkd", {s: state, id: d.docs[0].id}).then(function (r) {
+      var ids = d.docs.slice(0, 15).map(function (x) { return x.id; }).join(",");
+      post("pkd", {s: state, id: ids}).then(function (r) {
         // the link stays open after any failure but 'old' / 'login', so the person can pick another folder right here
-        if (r.ok) show("✅ Done!", "New files now go to " + (r.name || "that folder") + ". Go back to Telegram.", false);
+        if (r.ok && r.n > 1) show("✅ Done!", r.n + " folders added. They are buttons in Telegram now. Go back to Telegram.", false);
+        else if (r.ok) show("✅ Done!", "New files now go to " + (r.name || "that folder") + ". Go back to Telegram.", false);
         else if (r.why === "readonly") show("⚠️ View only", "You can only view " + (r.name || "that folder") +
           ", not add files to it. Pick another folder, or ask its owner for edit rights.", true);
         else if (r.why === "gone") show("⚠️ Folder not found", "That folder is gone or in the bin. Pick another one.", true);
