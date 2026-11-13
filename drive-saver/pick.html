@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="origin"><!-- the API key is restricted to this site: Google must see the origin -->
 <meta name="robots" content="noindex">
 <title>Drive Saver · pick a folder</title>
 <style>
@@ -77,11 +77,18 @@
       if (d.action !== google.picker.Action.PICKED || !d.docs || !d.docs.length) return;
       el("h").textContent = "Saving your choice…";
       post("pkd", {s: state, id: d.docs[0].id}).then(function (r) {
+        // the link stays open after any failure but 'old' / 'login', so the person can pick another folder right here
         if (r.ok) show("✅ Done!", "New files now go to " + (r.name || "that folder") + ". Go back to Telegram.", false);
-        else if (r.why === "readonly") show("⚠️ View only", "You can't add files to that folder. Go back to Telegram to pick another one.", false);
-        else show("⚠️ That did not work", "The link was already used or is too old. Go back to Telegram and tap Pick from my Drive again.", false);
+        else if (r.why === "readonly") show("⚠️ View only", "You can only view " + (r.name || "that folder") +
+          ", not add files to it. Pick another folder, or ask its owner for edit rights.", true);
+        else if (r.why === "gone") show("⚠️ Folder not found", "That folder is gone or in the bin. Pick another one.", true);
+        else if (r.why === "full") show("⚠️ Your folder list is full", "You already have " + (r.n || "the most") +
+          " folders. In Telegram open 📁 Save to → ✏️ and remove one, then pick again.", false);
+        else if (r.why === "err") show("⚠️ Google did not answer", "Please try again.", true);
+        else if (r.why === "login") show("⚠️ Drive not connected", "Go back to Telegram and tap Connect.", false);
+        else show("⚠️ That link did not work", "It was already used or is too old. Go back to Telegram and tap Pick from my Drive again.", false);
         if (r.ok) setTimeout(function () { location.href = TG; }, 1500);
-      }).catch(function () { show("⚠️ No connection", "Please check your internet and try again from Telegram.", false); });
+      }).catch(function () { show("⚠️ No connection", "Please check your internet and try again.", true); });
     }
     post("pkt", {s: state}).then(function (r) {
       if (!r.ok) {
