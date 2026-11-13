@@ -58,8 +58,8 @@
       el("s").style.display = "block"; el("b").innerHTML = "";
       // v1.32.0: My Drive as a TREE first (open a folder, go as deep as you like), then the flat lists as before
       var tree = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
-        .setParent("root").setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER);
-      if (tree.setLabel) tree.setLabel("My Drive");
+        .setParent(cfg.parent || "root").setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER);
+      if (tree.setLabel) tree.setLabel(cfg.parent ? "Inside this folder" : "My Drive");
       var mine = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
         .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes(FOLDER).setOwnedByMe(true);
       var shared = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
