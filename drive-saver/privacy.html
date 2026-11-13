@@ -23,7 +23,8 @@
   <p>Drive Saver is a Telegram bot run by BotVerse. It saves files you send it into your own Google Drive. This page explains what it collects and what it does with it.</p>
 
   <h2>Google permission we ask for</h2>
-  <p>Only <b>https://www.googleapis.com/auth/drive.file</b>. With it, Drive Saver can create files in your Drive and see or change only the files it created. It cannot see, read or delete anything else in your Drive.</p>
+  <p>By default, only <b>https://www.googleapis.com/auth/drive.file</b>. With it, Drive Saver can create files in your Drive and see or change only the files it created and the folders you pick for it. It cannot see, read or delete anything else in your Drive.</p>
+  <p><b>Optional full access.</b> You can choose to turn on "Show all my folders". Only then, and only after the bot has explained it, Drive Saver asks for <b>https://www.googleapis.com/auth/drive</b>, which lets it see, add and change all files in your Google Drive. We use it only to list your folders and to save the files you send. We do not read, copy, share or delete your other files. You can turn it off at any time in the bot (Save to, then "Back to limited access"), which cancels the permission at Google.</p>
 
   <h2>What we keep</h2>
   <ul>
